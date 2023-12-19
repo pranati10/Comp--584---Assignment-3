@@ -30,3 +30,10 @@ Comprehensive setup instructions are provided to guide users through the environ
 # Usage
 
 After following the installation guide, the application can be run locally, allowing users to interact with Yelp's business data. The user interface is designed for straightforward pagination and includes "Next" and "Previous" controls for data navigation.
+
+![ss](https://github.com/pranati10/Comp-584-Assignment-3/assets/88185279/ed6790c5-7767-4f20-870c-e141919ae692)
+
+
+![ss-2](https://github.com/pranati10/Comp-584-Assignment-3/assets/88185279/31b0d473-60bb-4eec-ad77-371504f2d1ee)
+
+
