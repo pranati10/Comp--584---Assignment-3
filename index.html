@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Business Directory</title>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 5px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Business Directory</h1>
+  <form id="filters">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name">
+    
+    <label for="city">City:</label>
+    <input type="text" id="city" name="city">
+    
+    <label for="category">Category:</label>
+    <input type="text" id="category" name="category">
+    
+    <button type="submit">Filter</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>City</th>
+        <th>Categories</th>
+      </tr>
+    </thead>
+    <tbody id="data">
+        <script>
+        const express = require('express');
+        const mysql = require('mysql2');
+        
+        const app = express();
+        app.use(express.json());
+        
+        const connection = mysql.createConnection({
+          host: 'localhost',
+          user: 'root',
+          password: 'example',
+          database: 'assign',
+          port: 13313
+        });
+        
+        // Middleware to handle database connection errors
+        app.use((req, res, next) => {
+          if (connection && connection.state === 'disconnected') {
+            res.status(500).send('Database connection was lost');
+          } else {
+            next();
+          }
+        });
+        
+        app.get('/businesses', (req, res) => {
+          const { page = 1, limit = 25, name, city, category } = req.query;
+        
+          let query = 'SELECT * FROM business WHERE 1=1';
+          if (name) query += ` AND name LIKE '%${name}%'`;
+          if (city) query += ` AND city LIKE '%${city}%'`;
+          if (category) query += ` AND categories LIKE '%${category}%'`;
+        
+          const offset = (page - 1) * limit;
+          query += ` LIMIT ${offset}, ${limit}`;
+        
+          connection.query(query, (error, results) => {
+            if (error) {
+              return res.status(500).send('Error retrieving data from the database');
+            }
+            res.json(results);
+          });
+        });
+        
+        const PORT = 3000;
+        app.listen(PORT, () => {
+          console.log(`Server is running on port ${PORT}`);
+        });
+        </script>
+    </tbody>
+  </table>
+
+  <button onclick="changePage(-1)">Previous</button>
+  <button onclick="changePage(1)">Next</button>
+
+  <script>
+    let currentPage = 1;
+
+    document.getElementById('filters').addEventListener('submit', function(event) {
+      event.preventDefault();
+      currentPage = 1; // Reset to first page
+      loadData();
+    });
+
+    function changePage(step) {
+      currentPage += step;
+      loadData();
+    }
+
+    function loadData() {
+      const name = document.getElementById('name').value;
+      const city = document.getElementById('city').value;
+      const category = document.getElementById('category').value;
+
+      fetch(`/businesses?page=${currentPage}&name=${name}&city=${city}&category=${category}`)
+        .then(response => response.json())
+        .then(data => {
+          const tableBody = document.getElementById('data');
+          tableBody.innerHTML = ''; // Clear the table
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${row.name}</td><td>${row.address}</td><td>${row.city}</td><td>${row.categories}</td>`;
+            tableBody.appendChild(tr);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    }
+
+    // Initial load
+    loadData();
+  </script>
+</body>
+</html>
